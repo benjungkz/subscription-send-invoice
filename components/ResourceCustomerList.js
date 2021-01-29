@@ -4,6 +4,7 @@ import { useQuery } from '@apollo/react-hooks';
 import { Card, ResourceList, ResourceItem, Button } from '@shopify/polaris';
 import InitialOrderList from '../static/InitialOrderList';
 import CreateDraftOrder from './CreateDraftOrder';
+import moment from 'moment';
 
 
 
@@ -61,6 +62,7 @@ const GET_DATA_FOR_DRAFT_ORDER = gql `
                     }
                 }
             }
+            createdAt
         }
     }
 
@@ -81,6 +83,24 @@ const ResourceListWithCustomersByTag = () =>{
 
     if(!loading) console.log(data);
                     
+
+    const isDayToCreateDraftOrder = ( createdAt ) =>{
+        
+        let initialOrderDate = moment(createdAt).utc().format();
+        let reccuringOrderDate = moment(createdAt).add(1, 'M').utc().format();
+        let today = moment().utc().format();
+        let test = moment('2021-02-20').utc().format();
+    
+        let isDayToCreateDraftOrder = moment(reccuringOrderDate).isSame(test, "day");
+    
+        console.log('initialOrderDate: ' + initialOrderDate)
+        console.log('reccuringOrderDate: ' + reccuringOrderDate);
+        console.log('today: '+ today);
+        console.log('test: ' + test)
+        console.log('isDayToCreateDraftOrder: ' + isDayToCreateDraftOrder);
+        
+        return isDayToCreateDraftOrder
+    }
    
     return(
     !loading? 
@@ -103,7 +123,8 @@ const ResourceListWithCustomersByTag = () =>{
     //         />
     //     </Card>
     //    : 
-       <CreateDraftOrder info={data} />
+       
+       <CreateDraftOrder info={data} isDate={isDayToCreateDraftOrder(data.order.createdAt)}/>
        :
        null
 
