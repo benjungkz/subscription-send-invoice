@@ -1,5 +1,9 @@
+import { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
+
+const SUCESS_MSG = 'Sending the invoice is sucess';
+const FAIL_MSG = 'Sending the invoice is fail';
 
 
 const SEND_INVOICE = gql`
@@ -11,29 +15,35 @@ const SEND_INVOICE = gql`
             userErrors {
                 field
                 message
+
+        
             }
         }
     }
 `;
 
 const SendDarftOrderInvoice = ({draftOrderId}) =>{
-
+    const [ result, setResult ] = useState('');
 
     const [SendInvoice, { loading, error, data }] = useMutation(SEND_INVOICE,{
         variables:{
             id: draftOrderId
         },
-        onCompleted:(data)=>{
-            console.log(data);
+        onCompleted:(data)=>{            
+            data.draftOrderInvoiceSend.userErrors.length == 0 ? setResult(SUCESS_MSG) : setResult(FAIL_MSG)
         }
     })
+
+    useEffect(()=>{
+        handler(draftOrderId);
+    },[draftOrderId]);
     
+    const handler = ( draftOrderId ) => {
+        if(draftOrderId != undefined || draftOrderId != '' ) SendInvoice();
+    }
 
     return(
-        draftOrderId == " " ?
-        <p>No Need {draftOrderId}</p>
-        :
-        <p onLoad={SendInvoice}></p>
+        <p>{ result != '' ? result : 'The invoice is not sent yet'}</p>
     )
 }
 

@@ -18,11 +18,11 @@ const app = next({
 const handle = app.getRequestHandler();
 const { SHOPIFY_API_SECRET, SHOPIFY_API_KEY, SCOPES } = process.env;
 
-//Cron
+// //Cron
 // const job = new CronJob(
-//   '* * * * * *',
+//   '1 * * * *',
 // 	function() {
-// 		console.log('You will see this message every second');
+// 		console.log('You will see this message 5mins');
 // 	},
 // 	null,
 // 	true,

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
 import LineItem from '../static/LineItem';
 import { Button } from '@shopify/polaris';
 import SendDarftOrderInvoice from './SendDraftOrderInvoice';
+import moment from 'moment';
 
 
 
@@ -23,11 +24,11 @@ const CREATE_DRAFT_ORDER = gql `
 
 `;
 
-const CreateDraftOrder = ({info, isDate}) =>{
+const CreateDraftOrder = ({order, isDate}) =>{
     const [ sendInvoice, setSendInvoice ] = useState('');
     
-    delete info.order.billingAddress.__typename;
-    delete info.order.shippingAddress.__typename;
+    delete order.billingAddress.__typename;
+    delete order.shippingAddress.__typename;
 
     const [ CreateDraftOrderForPrepaid, { data, loading } ] = useMutation(CREATE_DRAFT_ORDER,{
         variables:{
@@ -41,13 +42,13 @@ const CreateDraftOrder = ({info, isDate}) =>{
                 tags: [],
                 taxExempt: false,
                 useCustomerDefaultAddress: true,
-                billingAddress: info.order.billingAddress,
-                shippingAddress: info.order.shippingAddress,
-                customerId: info.order.customer.id,
-                email: info.order.customer.email,
+                billingAddress: order.billingAddress,
+                shippingAddress: order.shippingAddress,
+                customerId: order.customer.id,
+                email: order.customer.email,
                 lineItems:{
                     variantId: LineItem[0].id,
-                    quantity: info.order.lineItems.edges[0].node.fulfillableQuantity
+                    quantity: order.lineItems.edges[0].node.fulfillableQuantity
                 }
             }
         },
@@ -59,21 +60,23 @@ const CreateDraftOrder = ({info, isDate}) =>{
 
     })
 
-  
+    useEffect(()=>{
+        handler(isDate)
+    },[isDate]);
 
-    
+    const handler = (isDate) => {
+        if(isDate) CreateDraftOrderForPrepaid();
+    }
+
 
     return(
         <>
-            <Button onClick={
-
-                isDate? CreateDraftOrderForPrepaid : null
-
-                }>
-                Create Draft Order
-            </Button>
-
-             <SendDarftOrderInvoice draftOrderId={sendInvoice} />
+            {
+                sendInvoice != '' ? 
+                <SendDarftOrderInvoice draftOrderId={sendInvoice} />
+                :
+                <p>Due date is not today</p>
+            }
         </>
     );
 }

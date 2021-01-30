@@ -1,68 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
-import { Card, ResourceList, ResourceItem, Button } from '@shopify/polaris';
+import { Card, ResourceList, ResourceItem, TextStyle, Avatar } from '@shopify/polaris';
 import InitialOrderList from '../static/InitialOrderList';
 import CreateDraftOrder from './CreateDraftOrder';
 import moment from 'moment';
 
 
-
-// const GET_CUSTOMERS_BY_TAG = gql`
-//     query getCustomers($tag: String!){
-//         customers(first:10, query: $tag){
-//             edges{
-//                 node{
-//                     displayName
-//                     id
-//                     email
-//                     createdAt 
-//                 }
-//             }
-//         }
-//     }
-
-// `;
-
 const GET_DATA_FOR_DRAFT_ORDER = gql `
-    query getDataForDraftOrder($initial_order_id: ID!){
-        order(id: $initial_order_id){
-            billingAddress{
-                address1
-                address2,
-                city,
-                company,
-                country,
-                firstName,
-                lastName,
-                phone,
-                zip,
-                provinceCode
-            } 
-            shippingAddress{
-                address1
-                address2,
-                city,
-                company,
-                country,
-                firstName,
-                lastName,
-                phone,
-                zip,
-                provinceCode
-            }
-            customer{
-                id
-                email
-            }
-            lineItems(first:10){
-                edges{
-                    node{
-                        fulfillableQuantity 
+    query getDataForDraftOrder($initial_order_id: [ID!]!){
+        nodes(ids:$initial_order_id){
+            ... on Order{
+                billingAddress{
+                    address1
+                    address2,
+                    city,
+                    company,
+                    country,
+                    firstName,
+                    lastName,
+                    phone,
+                    zip,
+                    provinceCode
+                } 
+                shippingAddress{
+                    address1
+                    address2,
+                    city,
+                    company,
+                    country,
+                    firstName,
+                    lastName,
+                    phone,
+                    zip,
+                    provinceCode
+                }
+                customer{
+                    id
+                    email
+                    displayName
+                }
+                lineItems(first:10){
+                    edges{
+                        node{
+                            fulfillableQuantity 
+                        }
                     }
                 }
+                createdAt
             }
-            createdAt
         }
     }
 
@@ -72,16 +58,22 @@ const GET_DATA_FOR_DRAFT_ORDER = gql `
 
 const ResourceListWithCustomersByTag = () =>{
     
-    console.log(typeof InitialOrderList[0].orderId)
+    const prepaidOrderIds = InitialOrderList.map((prepaidOrder)=>{
+        console.log( prepaidOrder.orderId);
+        return prepaidOrder.orderId;                
+    })
 
+    console.log(prepaidOrderIds);
+    console.log(typeof prepaidOrderIds);
 
     const { data, error, loading } = useQuery( GET_DATA_FOR_DRAFT_ORDER, {
         variables:{
-            initial_order_id: InitialOrderList[0].orderId
+            initial_order_id: prepaidOrderIds
         }
     })    
 
     if(!loading) console.log(data);
+    if(error) console.log(error);
                     
 
     const isDayToCreateDraftOrder = ( createdAt ) =>{
@@ -103,31 +95,40 @@ const ResourceListWithCustomersByTag = () =>{
     }
    
     return(
-    !loading? 
-    //     <Card>
-    //         <ResourceList
-    //             items={data}
-    //             renderItem={(item, id, index)=>{
-    //                 return(
-    //                     <ResourceItem
-    //                         id={id}
-    //                         index={index}
-    //                         name={item.customer.id}
-                            
-    //                     >   
-    //                         <h3>{item.customer.email}</h3>
-    //                         <h3>{item.customer.id}</h3>
-    //                     </ResourceItem>        
-    //                 )
-    //             }}
-    //         />
-    //     </Card>
-    //    : 
-       
-       <CreateDraftOrder info={data} isDate={isDayToCreateDraftOrder(data.order.createdAt)}/>
-       :
-       null
 
+    !loading? 
+        <Card>
+
+            <ResourceList
+                resourceName={{singular: 'customer', plural: 'customer'}}
+                items={data.nodes}
+                renderItem={(item, id, index)=>{
+
+                    const media = <Avatar customer size="medium" name={item.displayName} />;
+
+                    return (
+                        <ResourceItem
+                            id={id}
+                            media={media}
+                        >
+                            <h3>
+                                <TextStyle variation="strong">{item.customer.displayName}</TextStyle>
+                            </h3>
+                            <div>{item.customer.email}</div> 
+                            <CreateDraftOrder order={item} isDate={isDayToCreateDraftOrder(item.createdAt)}/>  
+
+                        </ResourceItem>
+
+                    )
+                }}
+                >
+
+
+            </ResourceList>
+        </Card>
+        :
+        null   
+    
     );
     
 
