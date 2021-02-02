@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
-
-const SUCESS_MSG = 'Sending the invoice is sucess';
-const FAIL_MSG = 'Sending the invoice is fail';
-
+import AddRecurringTag  from './AddRecurringTag';
 
 const SEND_INVOICE = gql`
     mutation SendInvoice($id: ID!){
         draftOrderInvoiceSend(id: $id) {
             draftOrder {
                 id
+                name
             }
             userErrors {
                 field
@@ -22,15 +20,17 @@ const SEND_INVOICE = gql`
     }
 `;
 
-const SendDarftOrderInvoice = ({draftOrderId}) =>{
-    const [ result, setResult ] = useState('');
+const SendDarftOrderInvoice = ({draftOrderId, initialOrderId, recurringNumber}) =>{
+    const [ result, setResult ] = useState(false);
+    const [ draftOrderName, setDraftOrderName ] = useState('');
 
-    const [SendInvoice, { loading, error, data }] = useMutation(SEND_INVOICE,{
+    const [SendInvoice, { data, loading, error }] = useMutation(SEND_INVOICE,{
         variables:{
             id: draftOrderId
         },
         onCompleted:(data)=>{            
-            data.draftOrderInvoiceSend.userErrors.length == 0 ? setResult(SUCESS_MSG) : setResult(FAIL_MSG)
+            console.log(data);
+            data.draftOrderInvoiceSend.userErrors.length == 0 ? setDraftOrderName(data.draftOrderInvoiceSend.draftOrder.name) : null;
         }
     })
 
@@ -43,7 +43,7 @@ const SendDarftOrderInvoice = ({draftOrderId}) =>{
     }
 
     return(
-        <p>{ result != '' ? result : 'The invoice is not sent yet'}</p>
+        draftOrderName !="" ? <AddRecurringTag name={draftOrderName} id={initialOrderId} number={recurringNumber}/> : <p>'The invoice is not sent yet'</p>
     )
 }
 

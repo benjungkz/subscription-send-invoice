@@ -4,7 +4,6 @@ import { useMutation } from '@apollo/react-hooks';
 import LineItem from '../static/LineItem';
 import { Button } from '@shopify/polaris';
 import SendDarftOrderInvoice from './SendDraftOrderInvoice';
-import moment from 'moment';
 
 
 
@@ -24,11 +23,14 @@ const CREATE_DRAFT_ORDER = gql `
 
 `;
 
-const CreateDraftOrder = ({order, isDate}) =>{
+
+
+const CreateDraftOrder = ({order, isDate, recurringNumber}) =>{
     const [ sendInvoice, setSendInvoice ] = useState('');
     
     delete order.billingAddress.__typename;
     delete order.shippingAddress.__typename;
+
 
     const [ CreateDraftOrderForPrepaid, { data, loading } ] = useMutation(CREATE_DRAFT_ORDER,{
         variables:{
@@ -55,11 +57,18 @@ const CreateDraftOrder = ({order, isDate}) =>{
 
         onCompleted: (data)=>{
             console.log(data?.draftOrderCreate.draftOrder.id);
+            
+            // Send Invoice
             setSendInvoice(data?.draftOrderCreate.draftOrder.id);
+
+            // Set tag on initail tag
+            //AddRecurringTag()
+            
         }
 
     })
 
+   
     useEffect(()=>{
         handler(isDate)
     },[isDate]);
@@ -73,7 +82,10 @@ const CreateDraftOrder = ({order, isDate}) =>{
         <>
             {
                 sendInvoice != '' ? 
-                <SendDarftOrderInvoice draftOrderId={sendInvoice} />
+                <SendDarftOrderInvoice
+                    initialOrderId={order.id}
+                    recurringNumber={recurringNumber} 
+                    draftOrderId={sendInvoice} />
                 :
                 <p>Due date is not today</p>
             }

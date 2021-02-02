@@ -48,6 +48,8 @@ const GET_DATA_FOR_DRAFT_ORDER = gql `
                     }
                 }
                 createdAt
+                tags
+                id
             }
         }
     }
@@ -63,9 +65,6 @@ const ResourceListWithCustomersByTag = () =>{
         return prepaidOrder.orderId;                
     })
 
-    console.log(prepaidOrderIds);
-    console.log(typeof prepaidOrderIds);
-
     const { data, error, loading } = useQuery( GET_DATA_FOR_DRAFT_ORDER, {
         variables:{
             initial_order_id: prepaidOrderIds
@@ -76,26 +75,28 @@ const ResourceListWithCustomersByTag = () =>{
     if(error) console.log(error);
                     
 
-    const isDayToCreateDraftOrder = ( createdAt ) =>{
-        
-        let initialOrderDate = moment(createdAt).utc().format();
-        let reccuringOrderDate = moment(createdAt).add(1, 'M').utc().format();
-        let today = moment().utc().format();
-        let test = moment('2021-02-20').utc().format();
-    
-        let isDayToCreateDraftOrder = moment(reccuringOrderDate).isSame(test, "day");
-    
-        console.log('initialOrderDate: ' + initialOrderDate)
-        console.log('reccuringOrderDate: ' + reccuringOrderDate);
-        console.log('today: '+ today);
-        console.log('test: ' + test)
-        console.log('isDayToCreateDraftOrder: ' + isDayToCreateDraftOrder);
-        
-        return isDayToCreateDraftOrder
+    const isDayToCreateDraftOrder = ( createdAt, tags ) =>{
+        let maxRecurringNumber = 0;
+
+        // Check privious recurring order by tag
+        tags.forEach(tag =>{
+            if(tag.slice(0,1) == '#'){
+                if(parseInt(tag.slice(1,3)) > maxRecurringNumber){
+                    maxRecurringNumber = parseInt(tag.slice(1,3));
+                }
+            }
+        })
+
+        // Confirm it this month is next recurring month
+        let reccuringOrderDate = moment(createdAt).add(maxRecurringNumber + 1, 'M').utc().format();
+        //let today = moment().utc().format();
+        let test = moment("2021-02-20").utc().format();    
+        let isDay = moment(reccuringOrderDate).isSame(test, "day");
+        return { isDay, maxRecurringNumber }
     }
    
     return(
-
+        
     !loading? 
         <Card>
 
@@ -105,7 +106,9 @@ const ResourceListWithCustomersByTag = () =>{
                 renderItem={(item, id, index)=>{
 
                     const media = <Avatar customer size="medium" name={item.displayName} />;
-
+                    const { isDay, maxRecurringNumber } = isDayToCreateDraftOrder(item.createdAt, item.tags);
+                   
+                    
                     return (
                         <ResourceItem
                             id={id}
@@ -115,7 +118,10 @@ const ResourceListWithCustomersByTag = () =>{
                                 <TextStyle variation="strong">{item.customer.displayName}</TextStyle>
                             </h3>
                             <div>{item.customer.email}</div> 
-                            <CreateDraftOrder order={item} isDate={isDayToCreateDraftOrder(item.createdAt)}/>  
+                            <CreateDraftOrder 
+                                order={item} 
+                                recurringNumber={maxRecurringNumber + 1}
+                                isDate={isDay}/>  
 
                         </ResourceItem>
 
