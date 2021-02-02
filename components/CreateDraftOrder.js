@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
 import LineItem from '../static/LineItem';
-import { Button } from '@shopify/polaris';
+import { TextStyle } from '@shopify/polaris';
 import SendDarftOrderInvoice from './SendDraftOrderInvoice';
+import moment from 'moment';
 
 
 
@@ -25,7 +26,7 @@ const CREATE_DRAFT_ORDER = gql `
 
 
 
-const CreateDraftOrder = ({order, isDate, recurringNumber}) =>{
+const CreateDraftOrder = ({order, isDate, recurringNumber, recurringDate}) =>{
     const [ sendInvoice, setSendInvoice ] = useState('');
     
     delete order.billingAddress.__typename;
@@ -87,7 +88,9 @@ const CreateDraftOrder = ({order, isDate, recurringNumber}) =>{
                     recurringNumber={recurringNumber} 
                     draftOrderId={sendInvoice} />
                 :
-                <p>Due date is not today</p>
+                <p>
+                    <TextStyle variation="subdued">Due date is not today, the due date is {moment(recurringDate).format('MMMM Do, YYYY')}</TextStyle>
+                </p>
             }
         </>
     );

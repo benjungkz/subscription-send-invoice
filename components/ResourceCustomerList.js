@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
-import { Card, ResourceList, ResourceItem, TextStyle, Avatar } from '@shopify/polaris';
+import { Card, ResourceList, ResourceItem, TextStyle, Avatar, Layout, TextContainer, Heading, Button, Stack } from '@shopify/polaris';
 import InitialOrderList from '../static/InitialOrderList';
 import CreateDraftOrder from './CreateDraftOrder';
 import moment from 'moment';
@@ -50,6 +50,7 @@ const GET_DATA_FOR_DRAFT_ORDER = gql `
                 createdAt
                 tags
                 id
+                name
             }
         }
     }
@@ -89,49 +90,57 @@ const ResourceListWithCustomersByTag = () =>{
 
         // Confirm it this month is next recurring month
         let reccuringOrderDate = moment(createdAt).add(maxRecurringNumber + 1, 'M').utc().format();
-        //let today = moment().utc().format();
-        let test = moment("2021-02-20").utc().format();    
-        let isDay = moment(reccuringOrderDate).isSame(test, "day");
-        return { isDay, maxRecurringNumber }
+        let today = moment().utc().format();
+        //let test = moment("2021-02-20").utc().format();    
+        let isDay = moment(reccuringOrderDate).isSame(today, "day");
+        return { isDay, maxRecurringNumber, reccuringOrderDate }
     }
    
     return(
         
     !loading? 
-        <Card>
+        <Layout>
+            <Layout.Section>
+                <Card title="Customers List" sectioned>
+                    <Card.Section>
+                        <ResourceList
+                        resourceName={{singular: 'customer', plural: 'customer'}}
+                        items={data.nodes}
+                        renderItem={(item, id, index)=>{
 
-            <ResourceList
-                resourceName={{singular: 'customer', plural: 'customer'}}
-                items={data.nodes}
-                renderItem={(item, id, index)=>{
+                            const media = <Avatar customer size="medium" name={item.displayName} />;
+                            const { isDay, maxRecurringNumber, reccuringOrderDate } = isDayToCreateDraftOrder(item.createdAt, item.tags);
+                        
+                            
+                            return (
+                                <ResourceItem
+                                    id={id}
+                                    media={media}
+                                >   
+                                    <Stack spacing="loose" vertical>
+                                        <TextContainer>
+                                            <Heading>{item.customer.displayName} ({item.customer.email})</Heading>
+                                            <TextStyle variation="subdued">Initial Order : {item.name} </TextStyle>
+                                            <CreateDraftOrder 
+                                                order={item} 
+                                                recurringNumber={maxRecurringNumber + 1}
+                                                isDate={isDay}
+                                                recurringDate={reccuringOrderDate}/>  
+                                        </TextContainer>
+                                    </Stack>
+                                    {/* <Stack distribution="trailing">
+                                        <Button>Send addtional invoice</Button>
+                                    </Stack> */}
+                                </ResourceItem>
 
-                    const media = <Avatar customer size="medium" name={item.displayName} />;
-                    const { isDay, maxRecurringNumber } = isDayToCreateDraftOrder(item.createdAt, item.tags);
-                   
-                    
-                    return (
-                        <ResourceItem
-                            id={id}
-                            media={media}
+                            )
+                        }}
                         >
-                            <h3>
-                                <TextStyle variation="strong">{item.customer.displayName}</TextStyle>
-                            </h3>
-                            <div>{item.customer.email}</div> 
-                            <CreateDraftOrder 
-                                order={item} 
-                                recurringNumber={maxRecurringNumber + 1}
-                                isDate={isDay}/>  
-
-                        </ResourceItem>
-
-                    )
-                }}
-                >
-
-
-            </ResourceList>
-        </Card>
+                    </ResourceList>
+                    </Card.Section>    
+                </Card>
+            </Layout.Section>
+        </Layout>
         :
         null   
     

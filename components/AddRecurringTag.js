@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 import { useMutation } from '@apollo/react-hooks';
 import { useState, useEffect } from 'react';
+import { TextStyle } from '@shopify/polaris';
 import moment from 'moment';
 
 const ADD_TAG = gql`
@@ -45,7 +46,7 @@ const AddRecurringTag = ({ name, id, number }) => {
 
     return(
         result? 
-        <p>Sending Invoice is successful.</p>
+        <p><TextStyle variation="positive">Due date is today. Sending the invoice ({name}) is successful.</TextStyle></p>
         :
         null
     )
