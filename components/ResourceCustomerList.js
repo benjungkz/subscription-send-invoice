@@ -74,6 +74,9 @@ const ResourceListWithCustomersByTag = () =>{
 
     if(!loading) console.log(data);
     if(error) console.log(error);
+
+    // NULL
+    if(data.nodes[0] == null) return (<p>There is no subscription with pre-paid card</p>)
                     
 
     const isDayToCreateDraftOrder = ( createdAt, tags ) =>{
