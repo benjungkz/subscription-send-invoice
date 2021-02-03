@@ -62,7 +62,6 @@ const GET_DATA_FOR_DRAFT_ORDER = gql `
 const ResourceListWithCustomersByTag = () =>{
     
     const prepaidOrderIds = InitialOrderList.map((prepaidOrder)=>{
-        console.log( prepaidOrder.orderId);
         return prepaidOrder.orderId;                
     })
 
@@ -72,12 +71,9 @@ const ResourceListWithCustomersByTag = () =>{
         }
     })    
 
-    if(!loading) console.log(data);
-    if(error) console.log(error);
-
-    // NULL
-    if(data.nodes[0] == null) return (<p>There is no subscription with pre-paid card</p>)
-                    
+    // Check data null
+    if(!loading && data.nodes[0] == null) return (<Heading>There are no subscriptions with pre-paid card</Heading>)
+                
 
     const isDayToCreateDraftOrder = ( createdAt, tags ) =>{
         let maxRecurringNumber = 0;
