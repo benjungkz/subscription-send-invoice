@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import LineItem from "../static/LineItem";
-import { TextStyle } from "@shopify/polaris";
 import SendDarftOrderInvoice from "./SendDraftOrderInvoice";
-import moment from "moment";
 
 const CREATE_DRAFT_ORDER = gql`
   mutation CreateDraftOrderForPrepaid($input: DraftOrderInput!) {
