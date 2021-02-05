@@ -56,7 +56,7 @@ const CreateDraftOrder = ({
       },
 
       onCompleted: (data) => {
-        console.log(data?.draftOrderCreate.draftOrder.id);
+        console.log(data?.draftOrderCreate);
 
         // Send Invoice
         setSendInvoice(data?.draftOrderCreate.draftOrder.id);
@@ -83,7 +83,9 @@ const CreateDraftOrder = ({
           recurringNumber={recurringNumber}
           draftOrderId={sendInvoice}
         />
-      ) : null}
+      ) : (
+        <p>Fail to send invoce.</p>
+      )}
     </>
   );
 };
