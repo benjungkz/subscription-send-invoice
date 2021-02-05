@@ -90,8 +90,12 @@ const ResourceListWithCustomersByTag = () =>{
         // Confirm it this month is next recurring month
         let reccuringOrderDate = moment(createdAt).add(maxRecurringNumber + 1, 'M').utc().format();
         let today = moment().utc().format();
+        
         //let test = moment("2021-02-20").utc().format();    
         let isDay = moment(reccuringOrderDate).isSame(today, "day");
+        console.log('today: ' + today);
+        console.log('reccuringOrderDate: ' + reccuringOrderDate);
+        console.log('isDay: ' + isDay);
         return { isDay, maxRecurringNumber, reccuringOrderDate }
     }
    
