@@ -52,7 +52,7 @@ const GET_DATA_FOR_DRAFT_ORDER = gql`
         lineItems(first: 10) {
           edges {
             node {
-              fulfillableQuantity
+              quantity
             }
           }
         }
