@@ -50,7 +50,7 @@ const CreateDraftOrder = ({
           email: order.customer.email,
           lineItems: {
             variantId: LineItem[0].id,
-            quantity: order.lineItems.edges[0].node.fulfillableQuantity,
+            quantity: order.lineItems.edges[0].node.quantity,
           },
         },
       },
