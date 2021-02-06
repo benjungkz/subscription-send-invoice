@@ -93,6 +93,9 @@ const ResourceListWithCustomersByTag = () => {
       }
     });
 
+    //log
+    console.log("maxRecurringNumber" + maxRecurringNumber);
+
     // Confirm it this month is next recurring month
     let reccuringOrderDate = moment(createdAt)
       .add(maxRecurringNumber + 1, "M")
